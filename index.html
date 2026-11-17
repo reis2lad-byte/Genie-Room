@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>女子会ジーニー</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+<style>
+:root{
+  --bg:#f6f0ff; --surface:#ffffff; --ink:#2b1f45; --sub:#6f6290; --line:#e2d6f7;
+  --accent:#7a4dff; --accent-ink:#ffffff; --pop:#ff7eb6; --glow:#ffe27a;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#17102b;--surface:#241a40;--ink:#f3ecff;--sub:#b3a5d6;--line:#3a2d63;--accent:#a68bff;--accent-ink:#17102b;--pop:#ff8fc2;--glow:#ffd75e}
+}
+:root[data-theme="dark"]{--bg:#17102b;--surface:#241a40;--ink:#f3ecff;--sub:#b3a5d6;--line:#3a2d63;--accent:#a68bff;--accent-ink:#17102b;--pop:#ff8fc2;--glow:#ffd75e}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;font-weight:500;line-height:1.6;min-height:100vh}
+main{max-width:460px;margin:0 auto;padding:20px 18px 40px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:22px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pop),var(--accent));border-radius:99px;transition:width .35s}
+.genie{display:flex;align-items:flex-end;gap:12px;margin-bottom:20px}
+.face{font-size:72px;line-height:1;animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+@media (prefers-reduced-motion:reduce){.face{animation:none}.bar i{transition:none}}
+.bubble{position:relative;background:var(--surface);border:2px solid var(--line);border-radius:20px 20px 20px 4px;padding:14px 16px;font-weight:700;font-size:19px;flex:1}
+.hint{color:var(--sub);font-size:13px;margin:0 0 4px;font-weight:500}
+.opts{display:grid;gap:10px}
+button{font:inherit;cursor:pointer}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:16px;padding:14px 16px;font-weight:700;font-size:17px;transition:transform .1s,border-color .1s}
+.opt:hover,.opt:focus-visible{border-color:var(--accent);outline:none}
+.opt:active{transform:scale(.98)}
+.opt .e{font-size:28px}
+.opt small{display:block;font-weight:500;color:var(--sub);font-size:13px}
+.back{background:none;border:0;color:var(--sub);margin-top:16px;padding:8px 0;font-size:14px}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:24px;padding:22px 18px;text-align:center}
+.card .big{font-size:64px;line-height:1.1}
+.card h1{font-size:25px;margin:8px 0 6px;font-weight:900}
+.card p{margin:0 0 12px;color:var(--sub)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0}
+.chip{background:var(--bg);border:1.5px solid var(--line);border-radius:99px;padding:6px 14px;font-size:14px;font-weight:700}
+.chip.hot{background:var(--glow);border-color:var(--glow);color:#2b1f45}
+.act{width:100%;border:0;border-radius:16px;padding:14px;font-weight:900;font-size:17px;background:var(--accent);color:var(--accent-ink);margin-top:8px}
+.act.alt{background:transparent;color:var(--accent);border:2px solid var(--line)}
+.msg{font-size:13px;color:var(--sub);min-height:20px;margin-top:8px;text-align:center}
+.row{position:relative;display:flex;justify-content:space-between;padding:10px 12px;margin:6px 0;border-radius:12px;background:var(--surface);border:1.5px solid var(--line);overflow:hidden;font-weight:700}
+.row i{position:absolute;left:0;bottom:0;height:4px;background:var(--accent)}
+.row span,.row b{position:relative}
+.ttl{font-size:16px;margin:18px 0 4px}
+</style>
+</head>
+<body>
+<main>
+  <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+  <div id="app"></div>
+</main>
+<script>
+var R = {
+  lunch:{e:"🍽",t:"がっつりランチ女子会",d:"おいしいごはんを囲んで、時間を気にせずおしゃべり。",ideas:["人気ビストロ","個室ランチ","ホテルビュッフェ"]},
+  sweet:{e:"🍰",t:"アフタヌーンティー女子会",d:"かわいいスイーツと紅茶で、ゆったりトークの午後。",ideas:["ホテルのティーラウンジ","アフヌンセット","カフェ巡り"]},
+  wine:{e:"🍷",t:"昼飲み女子会",d:"明るいうちからゆるく乾杯。おしゃべりが止まらないやつ。",ideas:["昼飲みOKのお店","ワインバル","テラス席"]},
+  board:{e:"🧠",t:"ボドゲ・謎解き女子会",d:"みんなで頭を使って盛り上がる、笑い声多めの午後。",ideas:["ボドゲカフェ","謎解きイベント","脱出ゲーム"]},
+  kara:{e:"🎤",t:"発散!カラオケ・ボウリング女子会",d:"思いっきり声を出して、体を動かして、スッキリ。",ideas:["昼カラ","ボウリング","アミューズメント施設"]},
+  make:{e:"🎨",t:"ものづくり女子会",d:"作ったものがそのままお土産になる、思い出に残る会。",ideas:["陶芸","アクセサリー作り","お菓子作り"]},
+  hard:{e:"🔥",t:"アウトドア女子会",d:"外でしっかり体を動かして、ごはんもおいしい日。",ideas:["BBQ","ハイキング","手ぶらキャンプ"]},
+  soft:{e:"🍂",t:"ゆるっとおさんぽ女子会",d:"季節を感じながら、歩いて話してのんびり。",ideas:["紅葉さんぽ","公園ピクニック","カフェ併設の庭園"]}
+};
+var Q = {
+  q1:{q:"今日の気分は?",o:[["🗣","とにかくしゃべりたい","","q2"],["🏃","なにかして遊びたい","","q3"]]},
+  q2:{q:"何を食べたい?",o:[["🍽","がっつりランチ","","r:lunch"],["🍰","甘いもの","アフヌン・ティーラウンジ","r:sweet"],["🍷","昼からゆるく飲みたい","","r:wine"]]},
+  q3:{q:"室内と屋外、どっち?",o:[["🏠","室内","","q4"],["🌳","屋外","","q5"]]},
+  q4:{q:"どんなタイプで遊ぶ?",o:[["🧠","頭を使う","ボドゲ・謎解き","r:board"],["🎤","発散したい","カラオケ・ボウリング","r:kara"],["🎨","つくりたい","陶芸・アクセ・お菓子作り","r:make"]]},
+  q5:{q:"どのくらい動く?",o:[["🔥","しっかり","BBQ・ハイキング","r:hard"],["🍂","ゆるっと","紅葉さんぽ・ピクニック","r:soft"]]},
+  budget:{q:"予算はどのくらい?<span class=\"hint\" style=\"display:block;margin:4px 0 0\">夜の飲み会も含めた合計でね</span>",o:[["💴","¥5,000以内","昼+夜の合計","b:¥5,000以内(夜の飲み会込み)"],["💳","¥7,000くらい","昼+夜の合計","b:¥7,000くらい(夜の飲み会込み)"],["💰","¥10,000くらい","昼+夜の合計","b:¥10,000くらい(夜の飲み会込み)"],["👛","¥15,000くらい","昼+夜の合計","b:¥15,000くらい(夜の飲み会込み)"],["✨","気にしない","","b:予算は気にしない"]]},
+  time:{q:"集合は何時がいい?",o:[["🌤","11時","","t:11時"],["☀️","13時","","t:13時"],["🌇","15時","","t:15時"]]}
+};
+var st, hist, app = document.getElementById("app"), bar = document.getElementById("bar");
+var TOTAL = 5, MAX = 6, ctx = {db:null,id:null,owner:false,voted:false,count:0,ready:false};
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+(async function(){
+  try{
+    if (!window.claude || !claude.use) return;
+    var u = await claude.use("user"), db = await claude.use("db");
+    if (!db || !u) return;
+    ctx.db = db; ctx.id = await u.id(); ctx.owner = await u.isOwner();
+    if (ctx.id){ var d = await db.collection("data/users/" + ctx.id).doc("voted").get(); ctx.voted = d.exists; }
+    var c = await db.collection("ticks").get(); ctx.count = c.size; ctx.ready = true;
+    if (st.id === "q1") draw();
+  }catch(e){}
+})();
+function ownerBtn(){ return ctx.owner ? '<button class="act alt" id="tally">集計を見る(まとめ役のみ)</button>' : ''; }
+function wireTally(){ var t = document.getElementById("tally"); if (t) t.onclick = function(){ st.id = "tally"; draw(); }; }
+function gate(){
+  if (!ctx.ready || !(ctx.voted || ctx.count >= MAX)) return false;
+  app.innerHTML = '<div class="genie"><div class="face" aria-hidden="true">🧞‍♀️</div><div class="bubble">' + (ctx.voted ? '回答ずみよ!' : 'もう受付は終わったわ') + '</div></div><div class="card"><div class="big">' + (ctx.voted ? '✅' : '🔒') + '</div><h1>' + (ctx.voted ? '回答ありがとう!' : '受付終了') + '</h1><p>' + (ctx.voted ? '集計はまとめ役が見ます。結果を待っててね。' : MAX + '人の回答がそろったので締め切りました。') + '</p></div>' + ownerBtn();
+  wireTally(); return true;
+}
+async function vote(){
+  var m = document.getElementById("msg"), b = document.getElementById("vote");
+  if (!ctx.ready || !ctx.id){ m.textContent = "投票するには、Claudeにログインしてこのページを開いてね"; return; }
+  b.disabled = true;
+  try{
+    var c = await ctx.db.collection("ticks").get();
+    if (c.size >= MAX){ ctx.count = c.size; gate(); return; }
+    await ctx.db.collection("ticks").add({t:Date.now()});
+    await ctx.db.collection("votes").add({r:st.r,b:st.b,t:st.t});
+    await ctx.db.collection("data/users/" + ctx.id).doc("voted").set({v:1});
+    ctx.voted = true; ctx.count = c.size + 1; gate();
+  }catch(e){ m.textContent = "送信できませんでした。もう一度ためしてね"; b.disabled = false; }
+}
+function block(title, o, f){
+  var ks = Object.keys(o).sort(function(a,b){ return o[b] - o[a]; }), h = '<h2 class="ttl">' + title + '</h2>';
+  ks.forEach(function(k){ h += '<div class="row"><span>' + f(k) + '</span><b>' + o[k] + '票</b><i style="width:' + Math.min(100, o[k] / MAX * 100) + '%"></i></div>'; });
+  return h;
+}
+async function tally(){
+  app.innerHTML = '<p class="hint">集計中…</p>';
+  try{
+    var s = await ctx.db.collection("votes").get(), rs = {}, bs = {}, ts = {};
+    s.docs.forEach(function(d){ var v = d.data(); rs[v.r] = (rs[v.r]||0) + 1; bs[v.b] = (bs[v.b]||0) + 1; ts[v.t] = (ts[v.t]||0) + 1; });
+    var h = '<div class="genie"><div class="face" aria-hidden="true">🧞‍♀️</div><div class="bubble">集計結果(匿名)<p class="hint">' + s.size + '/' + MAX + '人が回答</p></div></div>';
+    h += block("どんな女子会?", rs, function(k){ return R[k] ? R[k].e + " " + R[k].t : esc(k); }) + block("予算", bs, esc) + block("集合時間", ts, esc);
+    app.innerHTML = h + '<button class="act alt" id="home">もどる</button>';
+    document.getElementById("home").onclick = reset;
+  }catch(e){ app.innerHTML = '<p class="msg">集計を読み込めませんでした。集計はまとめ役だけが見られます。</p><button class="act alt" id="home">もどる</button>'; document.getElementById("home").onclick = reset; }
+}
+function reset(){ st = {id:"q1", n:0, r:null, b:null, t:null}; hist = []; draw(); }
+function draw(){
+  bar.style.width = Math.min(100, st.n / TOTAL * 100) + "%";
+  if (st.id === "tally") return tally();
+  if (st.id === "q1" && st.n === 0 && gate()) return;
+  if (st.id === "result") return result();
+  var q = Q[st.id], h = '<div class="genie"><div class="face" aria-hidden="true">🧞‍♀️</div><div class="bubble"><p class="hint">質問 ' + (st.n + 1) + (ctx.ready ? '(回答 ' + ctx.count + '/' + MAX + '人)' : '') + '</p>' + q.q + '</div></div><div class="opts">';
+  q.o.forEach(function(o, i){
+    h += '<button class="opt" data-i="' + i + '"><span class="e">' + o[0] + '</span><span>' + o[1] + (o[2] ? '<small>' + o[2] + '</small>' : '') + '</span></button>';
+  });
+  h += '</div>';
+  if (hist.length) h += '<button class="back" id="back">← ひとつ戻る</button>';
+  if (!hist.length) h += ownerBtn();
+  app.innerHTML = h; wireTally();
+  app.querySelectorAll(".opt").forEach(function(b){ b.onclick = function(){ pick(q.o[+b.dataset.i][3]); }; });
+  var bk = document.getElementById("back"); if (bk) bk.onclick = back;
+}
+function pick(v){
+  hist.push(JSON.stringify(st));
+  var s = JSON.parse(JSON.stringify(st)); s.n++;
+  if (v.indexOf("r:") === 0){ s.r = v.slice(2); s.id = "budget"; }
+  else if (v.indexOf("b:") === 0){ s.b = v.slice(2); s.id = "time"; }
+  else if (v.indexOf("t:") === 0){ s.t = v.slice(2); s.id = "result"; }
+  else s.id = v;
+  st = s; draw();
+}
+function back(){ st = JSON.parse(hist.pop()); draw(); }
+function summary(){
+  var r = R[st.r];
+  return "【女子会の希望】\n" + r.e + " " + r.t + "\n" + st.b + " / " + st.t + "集合\nアイデア:" + r.ideas.join("・");
+}
+function result(){
+  var r = R[st.r];
+  var h = '<div class="genie"><div class="face" aria-hidden="true">🧞‍♀️</div><div class="bubble">わかったわ!あなたにおすすめはこれ!</div></div><div class="card"><div class="big">' + r.e + '</div><h1>' + r.t + '</h1><p>' + r.d + '</p><div class="chips">';
+  r.ideas.forEach(function(x){ h += '<span class="chip">' + x + '</span>'; });
+  h += '</div><div class="chips"><span class="chip hot">' + st.b + '</span><span class="chip hot">' + st.t + '集合</span></div></div>';
+  h += '<button class="act" id="vote">この内容で匿名投票する</button><button class="act alt" id="again">やり直す</button><div class="msg" id="msg"></div>';
+  app.innerHTML = h;
+  bar.style.width = "100%";
+  document.getElementById("again").onclick = reset;
+  document.getElementById("vote").onclick = vote;
+}
+reset();
+</script>
+</body>
+</html>
